@@ -10,11 +10,22 @@ struct OnboardingWelcomeView: View {
                 VStack(spacing: 16) {
                     // Logo and Title
                     VStack(spacing: 12) {
-                        Image(welcomeData.icon)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                        
+                        // App icon - automatically uses the icon from Assets.xcassets
+                        if let appIcon = AppConfig.getAppIcon() {
+                            Image(uiImage: appIcon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .clipShape(RoundedRectangle(cornerRadius: 22))
+                        } else {
+                            // Fallback if AppIcon can't be loaded
+                            Image(systemName: "app.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .foregroundColor(.accentColor)
+                        }
+
                         Text(welcomeData.title)
                             .font(.largeTitle)
                             .fontWeight(.bold)
