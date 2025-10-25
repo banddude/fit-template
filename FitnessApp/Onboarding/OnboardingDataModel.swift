@@ -1,107 +1,108 @@
 import SwiftUI
 import Foundation
 
+// MARK: - Root Structure
 struct OnboardingData: Codable {
     let onboarding: OnboardingContent
 }
 
 struct OnboardingContent: Codable {
-    let welcome: WelcomeData
-    let difficulty: DifficultyData
-    let equipment: EquipmentData
-    let tutorial: TutorialData
+    let welcome: WelcomeSection
+    let difficulty: InfoSection
+    let equipment: InfoSection
+    let tutorial: InfoSection
 }
 
-struct WelcomeData: Codable {
+// MARK: - Section Types
+
+struct WelcomeSection: Codable {
     let icon: String
     let title: String
     let subtitle: String
     let description: String
-    let features: [FeatureData]
+    let features: [OnboardingCard]
 }
 
-struct FeatureData: Codable {
-    let icon: String
-    let title: String
-    let description: String
-    let color: String
-}
-
-struct DifficultyData: Codable {
+struct InfoSection: Codable {
     let icon: String
     let title: String
     let description: String
     let proTip: String
-    let cards: [CardData]
+    let cards: [OnboardingCard]
 }
 
-struct EquipmentData: Codable {
-    let icon: String
-    let title: String
-    let description: String
-    let proTip: String
-    let cards: [CardData]
-}
+// MARK: - Unified Card Model
 
-struct TutorialData: Codable {
-    let icon: String
-    let title: String
-    let description: String
-    let proTip: String
-    let cards: [CardData]
-}
-
-struct CardData: Codable {
+struct OnboardingCard: Codable, Identifiable {
+    let id: UUID
     let icon: String?
     let title: String
     let description: String
     let color: String
-}
 
-// Extensions to convert string colors to SwiftUI Colors
-extension String {
-    var swiftUIColor: Color {
-        switch self.lowercased() {
-        case "mint": return .mint
-        case "blue": return .blue
-        case "purple": return .purple
-        case "orange": return .orange
-        case "teal": return .teal
-        case "indigo": return .indigo
-        case "red": return .red
-        case "green": return .green
-        case "yellow": return .yellow
-        case "pink": return .pink
-        default: return .blue
-        }
+    // Computed property for color conversion
+    var displayColor: Color {
+        color.swiftUIColor
+    }
+
+    // Custom decoding to generate UUID automatically
+    enum CodingKeys: String, CodingKey {
+        case icon, title, description, color
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = UUID()
+        self.icon = try container.decodeIfPresent(String.self, forKey: .icon)
+        self.title = try container.decode(String.self, forKey: .title)
+        self.description = try container.decode(String.self, forKey: .description)
+        self.color = try container.decode(String.self, forKey: .color)
+    }
+
+    // For programmatic creation
+    init(icon: String?, title: String, description: String, color: String) {
+        self.id = UUID()
+        self.icon = icon
+        self.title = title
+        self.description = description
+        self.color = color
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(icon, forKey: .icon)
+        try container.encode(title, forKey: .title)
+        try container.encode(description, forKey: .description)
+        try container.encode(color, forKey: .color)
     }
 }
 
-// Data loader
+// MARK: - Data Loader
+
 class OnboardingDataLoader: ObservableObject {
     @Published var data: OnboardingData?
     private let githubBaseURL = AppConfig.contentBaseURL
-    
+
     init() {
         loadOnboardingData()
     }
-    
+
     private func loadOnboardingData() {
         // Try loading from local bundle first as fallback
         if let bundleData = loadFromBundle() {
             self.data = bundleData
         }
-        
+
         // Then load from GitHub for latest content
         loadFromGitHub()
     }
-    
+
     private func loadFromBundle() -> OnboardingData? {
         guard let url = Bundle.main.url(forResource: "onboarding", withExtension: "json") else {
             print("Could not find local onboarding.json")
             return nil
         }
-        
+
         do {
             let data = try Data(contentsOf: url)
             return try JSONDecoder().decode(OnboardingData.self, from: data)
@@ -110,27 +111,27 @@ class OnboardingDataLoader: ObservableObject {
             return nil
         }
     }
-    
+
     private func loadFromGitHub() {
         let timestamp = Int(Date().timeIntervalSince1970)
         let urlString = "\(githubBaseURL)/onboarding.json?cache=\(timestamp)"
-        
+
         guard let url = URL(string: urlString) else {
             print("Invalid GitHub onboarding URL")
             return
         }
-        
+
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             if let error = error {
                 print("Error fetching onboarding data from GitHub: \(error)")
                 return
             }
-            
+
             guard let data = data else {
                 print("No onboarding data received from GitHub")
                 return
             }
-            
+
             do {
                 let onboardingData = try JSONDecoder().decode(OnboardingData.self, from: data)
                 DispatchQueue.main.async {

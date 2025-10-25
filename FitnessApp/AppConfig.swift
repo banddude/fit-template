@@ -7,7 +7,7 @@ struct AppConfig {
     // MARK: - Brand Configuration
     // Change this one variable to rebrand the entire app
     // Example: "skate", "office", "yoga", "dance", etc.
-    static let brand = "yourbrand"
+    static let brand = "skate"
 
     // MARK: - Derived Properties
 
@@ -17,7 +17,7 @@ struct AppConfig {
     }
 
     /// GitHub repository configuration
-    static let githubOwner = "yourusername"  // Your GitHub username
+    static let githubOwner = "banddude"  // Your GitHub username
     static let githubRepo = "fit-files"      // Your content repository name
     static let githubBranch = "main"
 

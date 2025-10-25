@@ -21,11 +21,9 @@ struct WorkoutPlayerView: View {
         self.exercises = exercises
         self.startingIndex = startingIndex
         self._currentExerciseIndex = State(initialValue: startingIndex)
-        print("DEBUG: WorkoutPlayerView init with startingIndex: \(startingIndex)")
     }
-    
+
     var body: some View {
-        let _ = print("DEBUG: WorkoutPlayerView body rendering with currentExerciseIndex: \(currentExerciseIndex)")
         ZStack {
             TabView(selection: $currentExerciseIndex) {
                 ForEach(exercises.indices, id: \.self) { index in
@@ -37,16 +35,10 @@ struct WorkoutPlayerView: View {
                         showExerciseDetails: $showExerciseDetails
                     )
                     .tag(index)
-                    .onAppear {
-                        print("DEBUG: Page \(index) appeared")
-                    }
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .ignoresSafeArea(.all)
-            .onAppear {
-                print("DEBUG: TabView appeared, should show index: \(currentExerciseIndex)")
-            }
             
             // Custom navigation bar overlay
             VStack {

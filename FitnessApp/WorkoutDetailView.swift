@@ -23,7 +23,7 @@ struct WorkoutDetailView: View {
     }
     
     private var sections: [String] {
-        ["Warm-up", "Main", "Cool-down"].filter { exercisesBySection[$0] != nil }
+        WorkoutSection.allSections.filter { exercisesBySection[$0] != nil }
     }
     
     var body: some View {
@@ -132,8 +132,6 @@ struct WorkoutDetailView: View {
                                 Button(action: {
                                     // Find the actual index in the full exercises array
                                     if let exerciseIndex = exercises.firstIndex(where: { $0.move == exercise.move && $0.section == exercise.section }) {
-                                        print("DEBUG: Tapped exercise: \(exercise.move)")
-                                        print("DEBUG: Found at index: \(exerciseIndex)")
                                         workoutPresentation = WorkoutPresentation(exerciseIndex: exerciseIndex)
                                     }
                                 }) {
@@ -152,7 +150,6 @@ struct WorkoutDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGroupedBackground))
         .fullScreenCover(item: $workoutPresentation) { presentation in
-            let _ = print("DEBUG: fullScreenCover creating WorkoutPlayerView with index: \(presentation.exerciseIndex)")
             WorkoutPlayerView(
                 workoutName: workoutName,
                 workoutColor: workoutColor,
@@ -165,9 +162,9 @@ struct WorkoutDetailView: View {
     
     private var totalDuration: Int {
         // Calculate approximate total duration based on exercises
-        let warmupCount = exercisesBySection["Warm-up"]?.count ?? 0
-        let mainCount = exercisesBySection["Main"]?.count ?? 0
-        let cooldownCount = exercisesBySection["Cool-down"]?.count ?? 0
+        let warmupCount = exercisesBySection[WorkoutSection.warmUp]?.count ?? 0
+        let mainCount = exercisesBySection[WorkoutSection.main]?.count ?? 0
+        let cooldownCount = exercisesBySection[WorkoutSection.coolDown]?.count ?? 0
         
         // Rough estimate: 2 min per warm-up/cooldown, 3 min per main exercise
         return (warmupCount * 2) + (mainCount * 3) + (cooldownCount * 2)

@@ -16,13 +16,6 @@ struct SplashView: View {
                         .scaledToFit()
                         .frame(width: 160, height: 160)
                         .clipShape(RoundedRectangle(cornerRadius: 35))
-                } else {
-                    // Fallback if AppIcon can't be loaded
-                    Image(systemName: "app.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 160, height: 160)
-                        .foregroundColor(themeManager.isDarkMode ? .white : .black)
                 }
 
                 Text(AppConfig.appName)

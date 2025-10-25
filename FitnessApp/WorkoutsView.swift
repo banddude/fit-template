@@ -18,13 +18,6 @@ struct WorkoutsView: View {
                         .scaledToFit()
                         .frame(width: 56, height: 56)
                         .clipShape(RoundedRectangle(cornerRadius: 11))
-                } else {
-                    // Fallback if AppIcon can't be loaded
-                    Image(systemName: "app.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 56, height: 56)
-                        .foregroundColor(themeManager.isDarkMode ? .white : .black)
                 }
 
                 Text(AppConfig.appName)

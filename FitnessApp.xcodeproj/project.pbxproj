@@ -26,9 +26,10 @@
 		9D0504B95C7F42D9A29F5A2E /* WorkoutPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F9D6BEAAF843A2953C8559 /* WorkoutPlayerView.swift */; };
 		9DF99448226E455CAFC56327 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BAF10445441A4A0952E96 /* SplashView.swift */; };
 		A57C295E296E49099038F746 /* OnboardingWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08615576E1B43C789EF8446 /* OnboardingWelcomeView.swift */; };
-		BBB7A1306C9945428DD5CACE /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F784261CFBD343EBA3985E88 /* AppConfig.swift */; };
 		CEC3D0BBE3A14C61B484AB55 /* EquipmentOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F007FEEFC7D4FC4AC2632AC /* EquipmentOverviewView.swift */; };
 		D588FEA63F074AE786B11504 /* OnboardingGesturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E958E40FA8A47508DF2EB65 /* OnboardingGesturesView.swift */; };
+		E14F5C362EAB22FA00B9C765 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E14F5C352EAB22FA00B9C765 /* AppConfig.swift */; };
+		E17C73E02EABFBA200A79431 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17C73DF2EABFBA200A79431 /* Extensions.swift */; };
 		F2EAA049E33E4F8C8663845E /* VideoTutorialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC78EA01058426DBCCCC4B6 /* VideoTutorialView.swift */; };
 		F904E153E51F47CB8FBBBF60 /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4F1B3FF22A94DF78F49B937 /* NetworkService.swift */; };
 /* End PBXBuildFile section */
@@ -58,8 +59,9 @@
 		CA6DD3F81F9F418B803C7515 /* OnboardingTemplateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTemplateView.swift; sourceTree = "<group>"; };
 		CD655450262F41009B485201 /* WorkoutDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDetailView.swift; sourceTree = "<group>"; };
 		D8F9D6BEAAF843A2953C8559 /* WorkoutPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPlayerView.swift; sourceTree = "<group>"; };
+		E14F5C352EAB22FA00B9C765 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		E17C73DF2EABFBA200A79431 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		F01BAF10445441A4A0952E96 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
-		F784261CFBD343EBA3985E88 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,7 +102,7 @@
 		84686A8FA7334CED86AD5D6C /* FitnessApp */ = {
 			isa = PBXGroup;
 			children = (
-				F784261CFBD343EBA3985E88 /* AppConfig.swift */,
+				E14F5C352EAB22FA00B9C765 /* AppConfig.swift */,
 				87A02ABD532A4B78B377BC2F /* ContentManager.swift */,
 				6E4B1FA5A2C9416D90813BEF /* GitHubContentService.swift */,
 				1C30D224F4F04080BA8E9653 /* Models.swift */,
@@ -109,6 +111,7 @@
 				48C7A05C032445F9A1D2341A /* App.swift */,
 				F01BAF10445441A4A0952E96 /* SplashView.swift */,
 				B0E20C70211F4277B3DE9BF1 /* ThemeManager.swift */,
+				E17C73DF2EABFBA200A79431 /* Extensions.swift */,
 				1AE1ED84DDF94FF79875C02A /* VideoService.swift */,
 				CD655450262F41009B485201 /* WorkoutDetailView.swift */,
 				D8F9D6BEAAF843A2953C8559 /* WorkoutPlayerView.swift */,
@@ -198,7 +201,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BBB7A1306C9945428DD5CACE /* AppConfig.swift in Sources */,
 				2F3D2ED87C7E43A0B0FED28D /* ContentManager.swift in Sources */,
 				37F2D8164E72442F8730BB86 /* GitHubContentService.swift in Sources */,
 				8A97B8B64C644D0BABAB90BF /* Models.swift in Sources */,
@@ -207,6 +209,7 @@
 				051E2BB9D4B94BF3B83157D9 /* App.swift in Sources */,
 				9DF99448226E455CAFC56327 /* SplashView.swift in Sources */,
 				6F90439661FA450FAB865D31 /* ThemeManager.swift in Sources */,
+				E14F5C362EAB22FA00B9C765 /* AppConfig.swift in Sources */,
 				06A65D43C23E4E05BB9A0E89 /* VideoService.swift in Sources */,
 				576ADFA9C1A4436A93CA62AD /* WorkoutDetailView.swift in Sources */,
 				9D0504B95C7F42D9A29F5A2E /* WorkoutPlayerView.swift in Sources */,
@@ -217,6 +220,7 @@
 				43893D4CB9A3423693E92A6E /* OnboardingDataModel.swift in Sources */,
 				D588FEA63F074AE786B11504 /* OnboardingGesturesView.swift in Sources */,
 				3955A7C6CED14E048925A071 /* OnboardingManager.swift in Sources */,
+				E17C73E02EABFBA200A79431 /* Extensions.swift in Sources */,
 				4AD9E0C8A2BA4276A5469C20 /* OnboardingTemplateView.swift in Sources */,
 				0D7E7E24FF5243C5A0B40C39 /* OnboardingView.swift in Sources */,
 				A57C295E296E49099038F746 /* OnboardingWelcomeView.swift in Sources */,

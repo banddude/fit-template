@@ -81,7 +81,12 @@ class NetworkService {
     static let shared = NetworkService()
     private init() {} // Singleton
 
-    private let baseURL = URL(string: "https://skatefit-server-production.up.railway.app")!
+    // Use a computed property that could be configured per brand when this service is enabled
+    private var baseURL: URL {
+        // TODO: When enabling this service, add serverURL to AppConfig
+        // For now, using a placeholder URL since this service is not in use
+        URL(string: "https://\(AppConfig.brand)-server-production.up.railway.app")!
+    }
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 

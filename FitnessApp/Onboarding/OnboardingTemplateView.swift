@@ -1,18 +1,8 @@
 import SwiftUI
 
-// Data structure for the cards
-struct OnboardingCardData: Identifiable {
-    let id = UUID()
-    let icon: String?
-    let title: String
-    let description: String
-    let color: Color
-    let gesture: String?
-}
-
 // Reusable Card View
 struct OnboardingCardView: View {
-    let data: OnboardingCardData
+    let data: OnboardingCard
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -20,12 +10,12 @@ struct OnboardingCardView: View {
                 if let icon = data.icon {
                     Image(systemName: icon)
                         .font(.title2)
-                        .foregroundColor(data.color)
+                        .foregroundColor(data.displayColor)
                 }
                 Text(data.title)
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(data.color)
+                    .foregroundColor(data.displayColor)
             }
 
             Text(data.description)
@@ -40,7 +30,7 @@ struct OnboardingCardView: View {
         .cornerRadius(10)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(data.color.opacity(0.3), lineWidth: 1)
+                .stroke(data.displayColor.opacity(0.3), lineWidth: 1)
         )
     }
 }
@@ -50,7 +40,7 @@ struct OnboardingTemplateView: View {
     let icon: String
     let title: String
     let description: String
-    let cardData: [OnboardingCardData]
+    let cardData: [OnboardingCard]
     let proTip: String?
 
     var body: some View {
