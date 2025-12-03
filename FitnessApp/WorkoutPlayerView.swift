@@ -8,37 +8,50 @@ struct WorkoutPlayerView: View {
     let difficulty: WorkoutDifficulty
     let exercises: [WorkoutExercise]
     let startingIndex: Int
+    @ObservedObject var videoPreloader: VideoPreloader
 
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var themeManager: ThemeManager
     @State private var currentExerciseIndex: Int
     @State private var showExerciseDetails = false
-    
-    init(workoutName: String, workoutColor: Color, difficulty: WorkoutDifficulty, exercises: [WorkoutExercise], startingIndex: Int) {
+
+    init(workoutName: String, workoutColor: Color, difficulty: WorkoutDifficulty, exercises: [WorkoutExercise], startingIndex: Int, videoPreloader: VideoPreloader) {
         self.workoutName = workoutName
         self.workoutColor = workoutColor
         self.difficulty = difficulty
         self.exercises = exercises
         self.startingIndex = startingIndex
+        self.videoPreloader = videoPreloader
         self._currentExerciseIndex = State(initialValue: startingIndex)
     }
 
     var body: some View {
         ZStack {
-            TabView(selection: $currentExerciseIndex) {
-                ForEach(exercises.indices, id: \.self) { index in
-                    SingleExercisePageView(
-                        exercise: exercises[index],
-                        difficulty: difficulty,
-                        index: index,
-                        total: exercises.count,
-                        showExerciseDetails: $showExerciseDetails
-                    )
-                    .tag(index)
+            GeometryReader { geometry in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 0) {
+                        ForEach(exercises.indices, id: \.self) { index in
+                            SingleExercisePageView(
+                                exercise: exercises[index],
+                                difficulty: difficulty,
+                                index: index,
+                                total: exercises.count,
+                                showExerciseDetails: $showExerciseDetails,
+                                player: videoPreloader.player(for: index)
+                            )
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .id(index)
+                        }
+                    }
+                    .scrollTargetLayout()
                 }
+                .scrollTargetBehavior(.paging)
+                .scrollPosition(id: Binding(
+                    get: { currentExerciseIndex },
+                    set: { if let newValue = $0 { currentExerciseIndex = newValue } }
+                ))
+                .ignoresSafeArea(.all)
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .ignoresSafeArea(.all)
             
             // Custom navigation bar overlay
             VStack {
@@ -337,35 +350,53 @@ struct SingleExercisePageView: View {
     let index: Int
     let total: Int
     @Binding var showExerciseDetails: Bool
-    
+    let player: AVPlayer?
+
+    // Fallback player if preloaded one is nil
+    @State private var fallbackPlayer: AVPlayer?
+
+    private var activePlayer: AVPlayer? {
+        player ?? fallbackPlayer
+    }
+
     var body: some View {
         ZStack {
-            // Full screen background video using custom player that properly fills
+            // Full screen background video using preloaded player
             GeometryReader { geometry in
-                if let videoURL = exercise.getVideoURL() {
-                    WorkoutVideoPlayerView(player: AVPlayer(url: videoURL))
+                if let player = activePlayer {
+                    WorkoutVideoPlayerView(player: player)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                         .onLongPressGesture(minimumDuration: 0.5) {
-                            print("🎯 Long press detected directly on video!")
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 showExerciseDetails.toggle()
                             }
-                            print("📋 Exercise details now: \(showExerciseDetails)")
                         }
                 } else {
                     Color.black
                         .onLongPressGesture(minimumDuration: 0.5) {
-                            print("🎯 Long press detected on black placeholder!")
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 showExerciseDetails.toggle()
                             }
-                            print("📋 Exercise details now: \(showExerciseDetails)")
                         }
                 }
             }
             .ignoresSafeArea(.all)
-            
+            .onAppear {
+                // Create fallback player if preloaded one is nil
+                if player == nil && fallbackPlayer == nil {
+                    if let url = exercise.getVideoURL() {
+                        let asset = AVURLAsset(url: url)
+                        let item = AVPlayerItem(asset: asset)
+                        item.preferredForwardBufferDuration = 2.0
+                        let newPlayer = AVPlayer(playerItem: item)
+                        newPlayer.isMuted = true
+                        newPlayer.automaticallyWaitsToMinimizeStalling = false
+                        fallbackPlayer = newPlayer
+                    }
+                }
+            }
+
             // UI overlay that respects safe areas
             VStack {
                 // Top UI with gradient background
@@ -447,12 +478,96 @@ struct SingleExercisePageView: View {
     
 }
 
+// MARK: - Video Preloader
+
+/// Preloads all AVPlayers for a workout's exercises
+class VideoPreloader: ObservableObject {
+    @Published private(set) var isLoading = true
+    @Published private(set) var loadedCount = 0
+
+    private var players: [Int: AVPlayer] = [:]
+    private let exercises: [WorkoutExercise]
+    private var loadTask: Task<Void, Never>?
+
+    init(exercises: [WorkoutExercise]) {
+        self.exercises = exercises
+    }
+
+    /// Start loading all videos (call from WorkoutDetailView.onAppear)
+    func startLoading() {
+        guard loadTask == nil else { return }
+
+        loadTask = Task {
+            // Load first video synchronously for immediate playback
+            if exercises.count > 0, let url = exercises[0].getVideoURL() {
+                let player = createPlayer(url: url)
+                await MainActor.run {
+                    players[0] = player
+                    loadedCount = 1
+                }
+            }
+
+            // Load rest in background
+            for index in 1..<exercises.count {
+                guard !Task.isCancelled else { break }
+
+                if let url = exercises[index].getVideoURL() {
+                    let player = createPlayer(url: url)
+                    await MainActor.run {
+                        players[index] = player
+                        loadedCount = index + 1
+                    }
+                }
+            }
+
+            await MainActor.run {
+                isLoading = false
+            }
+        }
+    }
+
+    /// Get player for index (returns nil if not yet loaded)
+    func player(for index: Int) -> AVPlayer? {
+        players[index]
+    }
+
+    /// Create a configured player
+    private func createPlayer(url: URL) -> AVPlayer {
+        let asset = AVURLAsset(url: url)
+        let playerItem = AVPlayerItem(asset: asset)
+        playerItem.preferredForwardBufferDuration = 2.0
+
+        let player = AVPlayer(playerItem: playerItem)
+        player.isMuted = true
+        player.automaticallyWaitsToMinimizeStalling = false
+
+        return player
+    }
+
+    /// Clean up all resources
+    func cleanup() {
+        loadTask?.cancel()
+        loadTask = nil
+
+        for (_, player) in players {
+            player.pause()
+            player.replaceCurrentItem(with: nil)
+        }
+        players.removeAll()
+    }
+
+    deinit {
+        cleanup()
+    }
+}
+
 #Preview {
     WorkoutPlayerView(
         workoutName: "Full Body Workout",
         workoutColor: .blue,
         difficulty: .intermediate,
         exercises: [],
-        startingIndex: 0
+        startingIndex: 0,
+        videoPreloader: VideoPreloader(exercises: [])
     )
 }

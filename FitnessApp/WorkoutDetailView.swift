@@ -9,13 +9,23 @@ struct WorkoutDetailView: View {
 
     @EnvironmentObject var themeManager: ThemeManager
     @State private var selectedExerciseIndex: Int? = nil
-    
+    @StateObject private var videoPreloader: VideoPreloader
+
     private struct WorkoutPresentation: Identifiable {
         let id = UUID()
         let exerciseIndex: Int
     }
-    
+
     @State private var workoutPresentation: WorkoutPresentation? = nil
+
+    init(workoutName: String, workoutIcon: String, workoutColor: Color, difficulty: WorkoutDifficulty, exercises: [WorkoutExercise]) {
+        self.workoutName = workoutName
+        self.workoutIcon = workoutIcon
+        self.workoutColor = workoutColor
+        self.difficulty = difficulty
+        self.exercises = exercises
+        self._videoPreloader = StateObject(wrappedValue: VideoPreloader(exercises: exercises))
+    }
     
     // Group exercises by section
     private var exercisesBySection: [String: [WorkoutExercise]] {
@@ -149,13 +159,20 @@ struct WorkoutDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGroupedBackground))
+        .onAppear {
+            videoPreloader.startLoading()
+        }
+        .onDisappear {
+            videoPreloader.cleanup()
+        }
         .fullScreenCover(item: $workoutPresentation) { presentation in
             WorkoutPlayerView(
                 workoutName: workoutName,
                 workoutColor: workoutColor,
                 difficulty: difficulty,
                 exercises: exercises,
-                startingIndex: presentation.exerciseIndex
+                startingIndex: presentation.exerciseIndex,
+                videoPreloader: videoPreloader
             )
         }
     }
